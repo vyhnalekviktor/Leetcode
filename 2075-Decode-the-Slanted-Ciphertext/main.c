@@ -2,20 +2,26 @@
 #include <stdlib.h>
 #include <string.h>
 
-// ch ie pr --> 8 znaku
-char* decodeCiphertext(char* encodedText, int rows) {
-    int rowLength = (strlen(encodedText) - rows+1) / rows; // = 2
-    char* decodedText = (char*) malloc(sizeof(char)*rowLength*rows+1); // size = 6* char
+// works but not for matrix
+void decodeCiphertext(char* encodedText, int rows, char** decodedText) {
+    int rowLength;
+    if (rows>1) {
+        rowLength = ((int)strlen(encodedText) - rows+1) / rows;
+    }
+    else {
+        rowLength = ((int)strlen(encodedText));
+    }
 
-    // save decoded
-    for (int i=0; i<rows; i++) {
-        for (int j=0; j<rowLength; j++) {
-            int spacePos = rows*j;
-            decodedText[i*rowLength+j] = encodedText[j*rowLength + i + spacePos];
+    char* originalText= (char*) malloc(sizeof(char)*rowLength*rows+1);
+    for (int i=0; i<rowLength; i++) {
+        for (int j=0; j<rows; j++) {
+            originalText[i*rowLength+j] = encodedText[j*rowLength + i + j];
         }
     }
-    decodedText[rowLength*rows]= '\0';
-    return decodedText;
+    originalText[rowLength * rows] = '\0';
+
+    *decodedText = strncpy(originalText, encodedText, rowLength*rows);
+    (*decodedText)[rowLength*rows]= '\0';
 }
 
 constexpr int MAX_LEN = 101;
@@ -25,8 +31,9 @@ int main() {
     if (scanf("%d", &rows) != 1 || rows <= 1 || rows > 1000) {return 1;}
     char* str = (char*) malloc(sizeof(char)*MAX_LEN);
     printf("enter string:\n");
-    scanf("%100s", str);
-
-    printf("%s\n",decodeCiphertext(str, rows));
-    free(str);
+    char* decodedText=NULL;
+    decodeCiphertext(str, rows, &decodedText);
+    printf("%s\n",decodedText);
+    free(decodedText);
+    return 0;
 }
